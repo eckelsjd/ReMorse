@@ -7,7 +7,7 @@
     "orientation": "portrait",
     "icon": "./assets/icon.png",
     "splash": {
-      "image": "./assets/splash.png",
+      "image": "./assets/splash2.png",
       "resizeMode": "contain",
       "backgroundColor": "#30336B"
     },
@@ -17,10 +17,6 @@
     "assetBundlePatterns": [
       "**/*"
     ],
-    "androidStatusBar": {
-      "barStyle": "light-content",
-      "backgroundColor": "#00000000"
-    },
     "android": {
       "package": "edu.rosehulman.desaiaj.remorse",
       "googleServicesFile": "./src/firebase/google-services.json"
