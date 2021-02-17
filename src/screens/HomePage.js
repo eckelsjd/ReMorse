@@ -10,19 +10,49 @@ import {
   Body,
   Icon,
   Fab,
+  Thumbnail,
 } from "native-base";
-import { View, StyleSheet } from "react-native";
+import { StyleSheet } from "react-native";
 import { connect } from "react-redux";
 import theme from "../../native-base-theme/variables/custom";
 import { ConversationListItem } from "../components/ConversationListItem";
+import { AuthContext } from "../navigation/AuthProvider";
+import UserAvatar from "react-native-user-avatar";
+import { firebase } from "../firebase/config";
+
+const conversationsRef = firebase.database().ref('conversations/');
+const membersRef = firebase.database().ref('members/');
+const messagesRef = firebase.database().ref('messages/');
+
 export class HomePage extends Component {
+  static contextType = AuthContext;
+  _user = () => {
+    return this.context.user;
+  };
+
+  componentDidMount() {
+    // conversationsRef.
+  }
+
+  componentWillUnmount() {}
+
   render() {
     return (
-      <Container>
+      <Container style={styles.container}>
         <Header>
           <Left>
             <Button transparent>
-              <Icon name="menu" />
+              {this._user().profilePictureUri ? (
+                <Thumbnail
+                  style={styles.userThumbnail}
+                  source={{ uri: this._user().profilePictureUri }}
+                />
+              ) : (
+                <Thumbnail
+                  style={styles.userThumbnail}
+                  source={require("../../assets/add_profile_image.png")}
+                />
+              )}
             </Button>
           </Left>
           <Body>
@@ -31,22 +61,27 @@ export class HomePage extends Component {
         </Header>
         <Content>
           <List>
-            <ConversationListItem />
+            {/* <ConversationListItem /> */}
           </List>
         </Content>
-        <View style={{ flex: 1 }}>
-          <Fab direction="up" style={styles.fab} position="bottomRight">
-            <Icon name="message" type="MaterialIcons" />
-          </Fab>
-        </View>
+        <Fab direction="up" style={styles.fab} position="bottomRight">
+          <Icon name="message" type="MaterialIcons" />
+        </Fab>
       </Container>
     );
   }
 }
 
 const styles = StyleSheet.create({
+  container: {
+    backgroundColor: theme.brandPrimary,
+  },
   fab: {
-    color: theme.brandPrimary,
+    backgroundColor: theme.btnPrimaryBg,
+  },
+  userThumbnail: {
+    width: 50,
+    height: 50,
   },
 });
 
@@ -54,8 +89,4 @@ function mapStateToProps(state) {
   return state;
 }
 
-function mapDispatchToProps(dispatch) {
-  return {};
-}
-
-export default connect(mapStateToProps, mapDispatchToProps)(HomePage);
+export default connect(mapStateToProps)(HomePage);

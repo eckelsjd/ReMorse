@@ -14,10 +14,10 @@ import {
 } from "native-base";
 import theme from "../../native-base-theme/variables/custom";
 import * as ImagePicker from "expo-image-picker";
-import { firebase } from "../firebase/config";
-import { registerUser } from "../redux/actions";
 import { connect } from "react-redux";
-import {bindActionCreators} from "redux";
+import EmailInputField from "../components/EmailInputField";
+import PasswordInputField from "../components/PasswordInputField";
+import { AuthContext } from "../navigation/AuthProvider";
 
 export class RegistrationPage extends Component {
   constructor(props) {
@@ -31,9 +31,9 @@ export class RegistrationPage extends Component {
     email: "",
     password: "",
     profilePictureUri: null,
-    emailError: false,
-    passwordError: false,
   };
+
+  static contextType = AuthContext;
 
   componentDidMount() {
     (async () => {
@@ -46,7 +46,6 @@ export class RegistrationPage extends Component {
         }
       }
     })();
-    console.log(this.props);
   }
 
   setFirstName = (text) => {
@@ -62,46 +61,19 @@ export class RegistrationPage extends Component {
     this.setState({ password: text });
   };
 
-  validatePassword = (password) => {
-    const passwordMinLength = 6;
-    if (password == undefined || password.length == 0) {
-      this.setState({ passwordError: false });
-    } else if (password.length <= passwordMinLength) {
-      this.setState({ passwordError: true });
-      Toast.show({
-        text: `Password must be longer than ${passwordMinLength} characters`,
-        duration: 1000,
-        type: "danger",
-        position: "bottom",
-      });
-    } else {
-      this.setState({ passwordError: false });
-    }
-  };
-
-  validateEmail = (email) => {
-    if (email == undefined || email.length == 0) {
-      this.setState({ emailError: false });
-    } else if (!email.includes("@") || !email.includes(".")) {
-      this.setState({ emailError: true });
-      Toast.show({
-        text: `Invalid email address`,
-        duration: 1000,
-        type: "danger",
-        position: "bottom",
-      });
-    } else {
-      this.setState({ emailError: false });
-    }
-  };
-
   chooseProfileImage = async () => {
-    let result = await ImagePicker.launchImageLibraryAsync({
+    const options = {
       mediaTypes: ImagePicker.MediaTypeOptions.Images,
       allowsEditing: true,
       aspect: [1, 1],
       quality: 1,
-    });
+    };
+
+    let result = await ImagePicker.launchImageLibraryAsync(options);
+
+    if (!result && Platform.OS == "android") {
+      result = await ImagePicker.getPendingResultAsync(options);
+    }
 
     if (!result.cancelled) {
       this.setState({ profilePictureUri: result.uri });
@@ -124,41 +96,18 @@ export class RegistrationPage extends Component {
 
   onRegisterPress = () => {
     var email = this.state.email;
-    var password = this.state.email;
+    var password = this.state.password;
     var firstName = this.state.firstName;
     var lastName = this.state.lastName;
     var profilePictureUri = this.state.profilePictureUri;
-    firebase
-      .auth()
-      .createUserWithEmailAndPassword(email, password)
-      .then((response) => {
-        const uid = response.user.uid;
-        const userData = {
-          uid: uid,
-          email: email,
-          firstName: firstName,
-          lastName: lastName,
-          profilePictureUri: profilePictureUri,
-        };
-        console.log(userData);
-        // this.props.registerUser(userData);
-        // firebase
-        //   .database()
-        //   .ref("users/" + uid)
-        //   .set(userData);
-      })
-      .catch((error) => {
-        console.log(error);
-        var errorCode = error.code;
-        var errorMessage = error.message;
-        Toast.show({
-          text: errorMessage,
-          buttonText: "Dismiss",
-          duration: 3000,
-          type: "danger",
-          position: "bottom",
-        });
-      });
+
+    this.context.register(
+      email,
+      password,
+      firstName,
+      lastName,
+      profilePictureUri
+    );
   };
 
   render() {
@@ -211,82 +160,16 @@ export class RegistrationPage extends Component {
               />
             </Item>
 
-            <Item
-              rounded
-              style={
-                !this.state.emailError ? styles.formItem : styles.formItemError
-              }
-            >
-              <Icon
-                name="email"
-                type="MaterialIcons"
-                style={
-                  !this.state.emailError
-                    ? styles.formIconAndText
-                    : styles.formErrorIconAndText
-                }
-              />
-              <Input
-                placeholder="Email"
-                placeholderTextColor="#FFFFFF90"
-                style={styles.formIconAndText}
-                onChangeText={(text) => {
-                  this.setEmail(text);
-                  this.validateEmail(text);
-                }}
-                value={this.state.email}
-                autoCompleteType="email"
-              />
-              {this.state.emailError ? (
-                <Icon
-                  name="closecircle"
-                  type="AntDesign"
-                  style={styles.formErrorIconAndText}
-                />
-              ) : (
-                <></>
-              )}
-            </Item>
+            <EmailInputField
+              onChangeEmail={(text) => this.setEmail(text)}
+              email={this.state.email}
+            />
 
-            <Item
-              rounded
-              style={
-                !this.state.passwordError
-                  ? styles.formItem
-                  : styles.formItemError
-              }
-            >
-              <Icon
-                name="lock-outline"
-                type="MaterialIcons"
-                style={
-                  !this.state.passwordError
-                    ? styles.formIconAndText
-                    : styles.formErrorIconAndText
-                }
-              />
-              <Input
-                placeholder="Password"
-                placeholderTextColor="#FFFFFF90"
-                secureTextEntry={true}
-                style={styles.formIconAndText}
-                onChangeText={(text) => {
-                  this.setPassword(text);
-                  this.validatePassword(text);
-                }}
-                value={this.state.password}
-                autoCompleteType="password"
-              />
-              {this.state.passwordError ? (
-                <Icon
-                  name="closecircle"
-                  type="AntDesign"
-                  style={styles.formErrorIconAndText}
-                />
-              ) : (
-                <></>
-              )}
-            </Item>
+            <PasswordInputField
+              onChangePassword={(text) => this.setPassword(text)}
+              password={this.state.password}
+              isLoginPassword={false}
+            />
 
             <Button
               full
@@ -316,6 +199,11 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
   },
+  formItem: {
+    backgroundColor: "#00000050",
+    borderColor: theme.brandInfo,
+    marginVertical: 10,
+  },
   userImage: {
     width: 128,
     height: 128,
@@ -339,19 +227,6 @@ const styles = StyleSheet.create({
   formLinkText: {
     color: theme.brandLight,
   },
-  formItem: {
-    backgroundColor: "#00000050",
-    borderColor: theme.brandInfo,
-    marginVertical: 10,
-  },
-  formItemError: {
-    backgroundColor: "#00000050",
-    borderColor: theme.brandDanger,
-    marginVertical: 10,
-  },
-  formErrorIconAndText: {
-    color: theme.brandDanger,
-  },
   signUpButton: {
     alignItems: "center",
     justifyContent: "center",
@@ -364,10 +239,4 @@ function mapStateToProps(state) {
   return state;
 }
 
-function mapDispatchToProps(dispatch) {
-  return {
-    registerUser: bindActionCreators(registerUser, dispatch),
-  };
-}
-
-export default connect(mapStateToProps, mapDispatchToProps)(RegistrationPage);
+export default connect(mapStateToProps)(RegistrationPage);

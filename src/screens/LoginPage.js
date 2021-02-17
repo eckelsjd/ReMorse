@@ -9,41 +9,26 @@ import {
   Header,
   Form,
   Item,
-  Input,
-  Toast,
 } from "native-base";
 import theme from "../../native-base-theme/variables/custom";
-import { firebase } from "../firebase/config";
 import { connect } from "react-redux";
+import EmailInputField from "../components/EmailInputField";
+import PasswordInputField from "../components/PasswordInputField";
+import { AuthContext } from "../navigation/AuthProvider";
 
 export class LoginPage extends Component {
   state = {
     email: "",
     password: "",
-    emailError: false,
   };
+
+  static contextType = AuthContext;
 
   setEmail = (text) => {
     this.setState({ email: text });
   };
   setPassword = (text) => {
     this.setState({ password: text });
-  };
-
-  validateEmail = (email) => {
-    if (email == undefined || email.length == 0) {
-      this.setState({ emailError: false });
-    } else if (!email.includes("@") || !email.includes(".")) {
-      this.setState({ emailError: true });
-      Toast.show({
-        text: `Invalid email address`,
-        duration: 1000,
-        type: "danger",
-        position: "bottom",
-      });
-    } else {
-      this.setState({ emailError: false });
-    }
   };
 
   onSignUpPress = () => {
@@ -53,41 +38,7 @@ export class LoginPage extends Component {
   onLoginPress = () => {
     var email = this.state.email;
     var password = this.state.password;
-
-    firebase
-      .auth()
-      .signInWithEmailAndPassword(email, password)
-      .then((response) => {
-        const uid = response.user.uid;
-        console.log(response);
-        // const usersRef = firebase.firestore().collection("users");
-        // usersRef
-        //   .doc(uid)
-        //   .get()
-        //   .then((firestoreDocument) => {
-        //     if (!firestoreDocument.exists) {
-        //       alert("User does not exist anymore.");
-        //       return;
-        //     }
-        //     const user = firestoreDocument.data();
-        //     navigation.navigate("Home", { user });
-        //   })
-        //   .catch((error) => {
-        //     alert(error);
-        //   });
-      })
-      .catch((error) => {
-        console.log(error);
-        var errorCode = error.code;
-        var errorMessage = error.message;
-        Toast.show({
-          text: errorMessage,
-          buttonText: "Dismiss",
-          duration: 5000,
-          type: "danger",
-          position: "bottom",
-        });
-      });
+    this.context.login(email, password);
   };
 
   render() {
@@ -105,57 +56,16 @@ export class LoginPage extends Component {
               source={require("../../assets/icon.png")}
             />
 
-            <Item
-              rounded
-              style={
-                !this.state.emailError ? styles.formItem : styles.formItemError
-              }
-            >
-              <Icon
-                name="email"
-                type="MaterialIcons"
-                style={
-                  !this.state.emailError
-                    ? styles.formIconAndText
-                    : styles.formErrorIconAndText
-                }
-              />
-              <Input
-                placeholder="Email"
-                placeholderTextColor="#FFFFFF90"
-                style={styles.formIconAndText}
-                onChangeText={(text) => {
-                  this.setEmail(text);
-                  this.validateEmail(text);
-                }}
-                value={this.state.email}
-                autoCompleteType="email"
-              />
-              {this.state.emailError ? (
-                <Icon
-                  name="closecircle"
-                  type="AntDesign"
-                  style={styles.formErrorIconAndText}
-                />
-              ) : (
-                <></>
-              )}
-            </Item>
+            <EmailInputField
+              onChangeEmail={(text) => this.setEmail(text)}
+              email={this.state.email}
+            />
 
-            <Item rounded style={styles.formItem}>
-              <Icon
-                name="lock-outline"
-                type="MaterialIcons"
-                style={styles.formIconAndText}
-              />
-              <Input
-                placeholder="Password"
-                placeholderTextColor="#FFFFFF90"
-                secureTextEntry={true}
-                style={styles.formIconAndText}
-                onChangeText={(text) => this.setPassword(text)}
-              />
-            </Item>
+            <PasswordInputField
+              onChangePassword={(text) => this.setPassword(text)}
+              password={this.state.password}
+              isLoginPassword={true}
+            />
 
             <Button
               full
@@ -209,19 +119,7 @@ const styles = StyleSheet.create({
   formLinkText: {
     color: theme.brandLight,
   },
-  formItem: {
-    backgroundColor: "#00000050",
-    borderColor: theme.brandInfo,
-    marginVertical: 10,
-  },
-  formItemError: {
-    backgroundColor: "#00000050",
-    borderColor: theme.brandDanger,
-    marginVertical: 10,
-  },
-  formErrorIconAndText: {
-    color: theme.brandDanger,
-  },
+
   formDivider: {
     justifyContent: "center",
     textAlign: "center",
@@ -253,8 +151,4 @@ function mapStateToProps(state) {
   return state;
 }
 
-function mapDispatchToProps(dispatch) {
-  return {};
-}
-
-export default connect(mapStateToProps, mapDispatchToProps)(LoginPage);
+export default connect(mapStateToProps)(LoginPage);

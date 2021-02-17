@@ -5,19 +5,20 @@ import UserAvatar from "react-native-user-avatar";
 export class ConversationListItem extends Component {
   render() {
     return (
-      <ListItem avatar>
+      <ListItem>
         <Left>
-          <UserAvatar size={40} name="Default" />
+          <UserAvatar size={50} name={this.props.username} />
         </Left>
         <Body>
-          <Text>Default</Text>
-          <Text note numberOfLines={1}>Default
+          <Text>{this.props.messageSender}</Text>
+          <Text note numberOfLines={1}>
+            {this.props.message}
           </Text>
         </Body>
         <Right>
-          <Text note>00:00</Text>
+          <Text note>{this.props.messageTimestamp}</Text>
           <Badge info>
-            <Text>0</Text>
+            <Text>{this.props.messageNotifications}</Text>
           </Badge>
         </Right>
       </ListItem>
