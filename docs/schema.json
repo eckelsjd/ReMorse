@@ -1,0 +1,15 @@
+{
+	"users": [
+		{
+			"email": "email@site.com",
+			"uid": "svfvdvD",
+			"firstName": "Bob",
+			"lastName": "Dylan",
+			"profilePictureURI": "file.jpg"
+		}
+	],
+	"groups": [],
+	"conversations": [],
+	"messages": [],
+	"members": []
+}

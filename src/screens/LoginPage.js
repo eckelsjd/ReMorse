@@ -10,14 +10,17 @@ import {
   Form,
   Item,
   Input,
+  Toast,
 } from "native-base";
 import theme from "../../native-base-theme/variables/custom";
 import { firebase } from "../firebase/config";
+import { connect } from "react-redux";
 
 export class LoginPage extends Component {
   state = {
     email: "",
     password: "",
+    emailError: false,
   };
 
   setEmail = (text) => {
@@ -25,6 +28,22 @@ export class LoginPage extends Component {
   };
   setPassword = (text) => {
     this.setState({ password: text });
+  };
+
+  validateEmail = (email) => {
+    if (email == undefined || email.length == 0) {
+      this.setState({ emailError: false });
+    } else if (!email.includes("@") || !email.includes(".")) {
+      this.setState({ emailError: true });
+      Toast.show({
+        text: `Invalid email address`,
+        duration: 1000,
+        type: "danger",
+        position: "bottom",
+      });
+    } else {
+      this.setState({ emailError: false });
+    }
   };
 
   onSignUpPress = () => {
@@ -61,7 +80,13 @@ export class LoginPage extends Component {
         console.log(error);
         var errorCode = error.code;
         var errorMessage = error.message;
-        alert(errorMessage);
+        Toast.show({
+          text: errorMessage,
+          buttonText: "Dismiss",
+          duration: 5000,
+          type: "danger",
+          position: "bottom",
+        });
       });
   };
 
@@ -80,18 +105,41 @@ export class LoginPage extends Component {
               source={require("../../assets/icon.png")}
             />
 
-            <Item rounded style={styles.formItem}>
+            <Item
+              rounded
+              style={
+                !this.state.emailError ? styles.formItem : styles.formItemError
+              }
+            >
               <Icon
                 name="email"
                 type="MaterialIcons"
-                style={styles.formIconAndText}
+                style={
+                  !this.state.emailError
+                    ? styles.formIconAndText
+                    : styles.formErrorIconAndText
+                }
               />
               <Input
                 placeholder="Email"
                 placeholderTextColor="#FFFFFF90"
                 style={styles.formIconAndText}
-                onChangeText={(text) => this.setEmail(text)}
+                onChangeText={(text) => {
+                  this.setEmail(text);
+                  this.validateEmail(text);
+                }}
+                value={this.state.email}
+                autoCompleteType="email"
               />
+              {this.state.emailError ? (
+                <Icon
+                  name="closecircle"
+                  type="AntDesign"
+                  style={styles.formErrorIconAndText}
+                />
+              ) : (
+                <></>
+              )}
             </Item>
 
             <Item rounded style={styles.formItem}>
@@ -151,7 +199,7 @@ const styles = StyleSheet.create({
     justifyContent: "center",
   },
   logo: {
-    marginLeft: 20,
+    alignSelf: "center",
     justifyContent: "center",
     marginVertical: 20,
   },
@@ -165,6 +213,14 @@ const styles = StyleSheet.create({
     backgroundColor: "#00000050",
     borderColor: theme.brandInfo,
     marginVertical: 10,
+  },
+  formItemError: {
+    backgroundColor: "#00000050",
+    borderColor: theme.brandDanger,
+    marginVertical: 10,
+  },
+  formErrorIconAndText: {
+    color: theme.brandDanger,
   },
   formDivider: {
     justifyContent: "center",
@@ -193,4 +249,12 @@ const styles = StyleSheet.create({
   },
 });
 
-export default LoginPage;
+function mapStateToProps(state) {
+  return state;
+}
+
+function mapDispatchToProps(dispatch) {
+  return {};
+}
+
+export default connect(mapStateToProps, mapDispatchToProps)(LoginPage);

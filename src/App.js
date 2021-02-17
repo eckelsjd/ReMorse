@@ -1,23 +1,25 @@
-import React, { Component, useState } from "react";
+import React, { Component } from "react";
 import { registerRootComponent } from "expo";
 import AppLoading from "expo-app-loading";
 import * as Font from "expo-font";
 import { Ionicons } from "@expo/vector-icons";
 import { HomePage } from "./screens/HomePage";
 import { Provider } from "react-redux";
-import { getTheme, StyleProvider } from "native-base";
+import { getTheme, StyleProvider,Root } from "native-base";
 import theme from "../native-base-theme/variables/custom";
 import store from "./redux/reducers";
 import { LoginPage } from "./screens/LoginPage";
 import { RegistrationPage } from "./screens/RegistrationPage";
 import { NavigationContainer } from "@react-navigation/native";
 import { createStackNavigator } from "@react-navigation/stack";
+import { connect } from "react-redux";
+
+
 const Stack = createStackNavigator();
 
 class RemorseApp extends Component {
   state = {
     isAppReady: false,
-    user: null,
   };
 
   async componentDidMount() {
@@ -36,11 +38,12 @@ class RemorseApp extends Component {
       return (
         <StyleProvider style={getTheme(theme)}>
           <Provider store={store}>
+          <Root>
             <NavigationContainer>
               <Stack.Navigator headerMode="none" screenOptions={{headerTintColor: "#00000000",}}>
-                {this.state.user ? (
+                {this.props.user ? (
                   <Stack.Screen name="Home">
-                    {(props) => <HomePage {...props} extraData={this.state.user} />}
+                    {(props) => <HomePage {...props} extraData={this.props.user} />}
                   </Stack.Screen>
                 ) : (
                   <>
@@ -53,6 +56,7 @@ class RemorseApp extends Component {
                 )}
               </Stack.Navigator>
             </NavigationContainer>
+            </Root>
           </Provider>
         </StyleProvider>
       );
@@ -60,4 +64,9 @@ class RemorseApp extends Component {
   }
 }
 
-export default registerRootComponent(RemorseApp);
+function mapStateToProps(state) {
+  return state;
+}
+
+registerRootComponent(RemorseApp);
+export default connect(mapStateToProps)(RemorseApp);

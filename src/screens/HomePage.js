@@ -11,9 +11,10 @@ import {
   Icon,
   Fab,
 } from "native-base";
-import { View } from "react-native";
+import { View, StyleSheet } from "react-native";
 import { connect } from "react-redux";
-import {ConversationListItem} from "../components/ConversationListItem";
+import theme from "../../native-base-theme/variables/custom";
+import { ConversationListItem } from "../components/ConversationListItem";
 export class HomePage extends Component {
   render() {
     return (
@@ -30,17 +31,12 @@ export class HomePage extends Component {
         </Header>
         <Content>
           <List>
-            <ConversationListItem/>
+            <ConversationListItem />
           </List>
-
         </Content>
         <View style={{ flex: 1 }}>
-          <Fab
-            direction="up"
-            style={{ backgroundColor: "#5057FF" }}
-            position="bottomRight"
-          >
-            <Icon name="create" />
+          <Fab direction="up" style={styles.fab} position="bottomRight">
+            <Icon name="message" type="MaterialIcons" />
           </Fab>
         </View>
       </Container>
@@ -48,12 +44,18 @@ export class HomePage extends Component {
   }
 }
 
+const styles = StyleSheet.create({
+  fab: {
+    color: theme.brandPrimary,
+  },
+});
+
 function mapStateToProps(state) {
-  return {};
+  return state;
 }
 
 function mapDispatchToProps(dispatch) {
   return {};
 }
 
-export default connect(mapStateToProps)(HomePage);
+export default connect(mapStateToProps, mapDispatchToProps)(HomePage);

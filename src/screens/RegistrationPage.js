@@ -10,10 +10,14 @@ import {
   Text,
   Icon,
   Button,
+  Toast,
 } from "native-base";
 import theme from "../../native-base-theme/variables/custom";
 import * as ImagePicker from "expo-image-picker";
 import { firebase } from "../firebase/config";
+import { registerUser } from "../redux/actions";
+import { connect } from "react-redux";
+import {bindActionCreators} from "redux";
 
 export class RegistrationPage extends Component {
   constructor(props) {
@@ -27,6 +31,8 @@ export class RegistrationPage extends Component {
     email: "",
     password: "",
     profilePictureUri: null,
+    emailError: false,
+    passwordError: false,
   };
 
   componentDidMount() {
@@ -40,6 +46,7 @@ export class RegistrationPage extends Component {
         }
       }
     })();
+    console.log(this.props);
   }
 
   setFirstName = (text) => {
@@ -53,6 +60,39 @@ export class RegistrationPage extends Component {
   };
   setPassword = (text) => {
     this.setState({ password: text });
+  };
+
+  validatePassword = (password) => {
+    const passwordMinLength = 6;
+    if (password == undefined || password.length == 0) {
+      this.setState({ passwordError: false });
+    } else if (password.length <= passwordMinLength) {
+      this.setState({ passwordError: true });
+      Toast.show({
+        text: `Password must be longer than ${passwordMinLength} characters`,
+        duration: 1000,
+        type: "danger",
+        position: "bottom",
+      });
+    } else {
+      this.setState({ passwordError: false });
+    }
+  };
+
+  validateEmail = (email) => {
+    if (email == undefined || email.length == 0) {
+      this.setState({ emailError: false });
+    } else if (!email.includes("@") || !email.includes(".")) {
+      this.setState({ emailError: true });
+      Toast.show({
+        text: `Invalid email address`,
+        duration: 1000,
+        type: "danger",
+        position: "bottom",
+      });
+    } else {
+      this.setState({ emailError: false });
+    }
   };
 
   chooseProfileImage = async () => {
@@ -83,60 +123,41 @@ export class RegistrationPage extends Component {
   };
 
   onRegisterPress = () => {
-
     var email = this.state.email;
     var password = this.state.email;
     var firstName = this.state.firstName;
     var lastName = this.state.lastName;
-
-    console.log("email: "+email);
-    console.log("password: "+password);
-
+    var profilePictureUri = this.state.profilePictureUri;
     firebase
       .auth()
       .createUserWithEmailAndPassword(email, password)
       .then((response) => {
         const uid = response.user.uid;
-        const data = {
-          id: uid,
-          email,
-          firstName,
-          lastName,
+        const userData = {
+          uid: uid,
+          email: email,
+          firstName: firstName,
+          lastName: lastName,
+          profilePictureUri: profilePictureUri,
         };
-        console.log(response);
-        //   const usersRef = firebase.firestore().collection("users");
-        //   usersRef
-        //     .doc(uid)
-        //     .set(data)
-        //     .then(() => {
-        //       navigation.navigate("Home", { user: data });
-        //     })
-        //     .catch((error) => {
-        //       alert(error);
-        //     });
-        // })
-        // .catch((error) => {
-        //   alert(error);
-        // });
+        console.log(userData);
+        // this.props.registerUser(userData);
+        // firebase
+        //   .database()
+        //   .ref("users/" + uid)
+        //   .set(userData);
       })
       .catch((error) => {
         console.log(error);
         var errorCode = error.code;
         var errorMessage = error.message;
-        switch (errorCode) {
-          case "auth/weak-password":
-            alert( errorMessage);
-            break;
-          case "auth/email-already-in-use":
-            alert( errorMessage);
-            break;
-          case "auth/invalid-email":
-            alert(errorMessage);
-            break;
-          default:
-            alert(errorMessage);
-            break;
-        }
+        Toast.show({
+          text: errorMessage,
+          buttonText: "Dismiss",
+          duration: 3000,
+          type: "danger",
+          position: "bottom",
+        });
       });
   };
 
@@ -190,33 +211,81 @@ export class RegistrationPage extends Component {
               />
             </Item>
 
-            <Item rounded style={styles.formItem}>
+            <Item
+              rounded
+              style={
+                !this.state.emailError ? styles.formItem : styles.formItemError
+              }
+            >
               <Icon
                 name="email"
                 type="MaterialIcons"
-                style={styles.formIconAndText}
+                style={
+                  !this.state.emailError
+                    ? styles.formIconAndText
+                    : styles.formErrorIconAndText
+                }
               />
               <Input
                 placeholder="Email"
                 placeholderTextColor="#FFFFFF90"
                 style={styles.formIconAndText}
-                onChangeText={(text) => this.setEmail(text)}
+                onChangeText={(text) => {
+                  this.setEmail(text);
+                  this.validateEmail(text);
+                }}
+                value={this.state.email}
+                autoCompleteType="email"
               />
+              {this.state.emailError ? (
+                <Icon
+                  name="closecircle"
+                  type="AntDesign"
+                  style={styles.formErrorIconAndText}
+                />
+              ) : (
+                <></>
+              )}
             </Item>
 
-            <Item rounded style={styles.formItem}>
+            <Item
+              rounded
+              style={
+                !this.state.passwordError
+                  ? styles.formItem
+                  : styles.formItemError
+              }
+            >
               <Icon
                 name="lock-outline"
                 type="MaterialIcons"
-                style={styles.formIconAndText}
+                style={
+                  !this.state.passwordError
+                    ? styles.formIconAndText
+                    : styles.formErrorIconAndText
+                }
               />
               <Input
                 placeholder="Password"
                 placeholderTextColor="#FFFFFF90"
                 secureTextEntry={true}
                 style={styles.formIconAndText}
-                onChangeText={(text) => this.setPassword(text)}
+                onChangeText={(text) => {
+                  this.setPassword(text);
+                  this.validatePassword(text);
+                }}
+                value={this.state.password}
+                autoCompleteType="password"
               />
+              {this.state.passwordError ? (
+                <Icon
+                  name="closecircle"
+                  type="AntDesign"
+                  style={styles.formErrorIconAndText}
+                />
+              ) : (
+                <></>
+              )}
             </Item>
 
             <Button
@@ -235,7 +304,6 @@ export class RegistrationPage extends Component {
               </Text>
             </Text>
           </Form>
-          
         </Content>
       </Container>
     );
@@ -255,7 +323,7 @@ const styles = StyleSheet.create({
     overflow: "hidden",
   },
   userImageButton: {
-    marginStart: 48,
+    alignSelf: "center",
     marginBottom: 10,
     alignItems: "center",
     justifyContent: "center",
@@ -276,6 +344,14 @@ const styles = StyleSheet.create({
     borderColor: theme.brandInfo,
     marginVertical: 10,
   },
+  formItemError: {
+    backgroundColor: "#00000050",
+    borderColor: theme.brandDanger,
+    marginVertical: 10,
+  },
+  formErrorIconAndText: {
+    color: theme.brandDanger,
+  },
   signUpButton: {
     alignItems: "center",
     justifyContent: "center",
@@ -284,4 +360,14 @@ const styles = StyleSheet.create({
   },
 });
 
-export default RegistrationPage;
+function mapStateToProps(state) {
+  return state;
+}
+
+function mapDispatchToProps(dispatch) {
+  return {
+    registerUser: bindActionCreators(registerUser, dispatch),
+  };
+}
+
+export default connect(mapStateToProps, mapDispatchToProps)(RegistrationPage);

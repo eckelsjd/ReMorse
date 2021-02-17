@@ -1,13 +1,16 @@
-const GOT_USER = 'GOT_USER';
+import { REGISTER_USER } from "../actionTypes";
 
-export const gotUser = user => ({ type: GOT_USER, user });
+const initialState = {
+    user: null,
+};
 
-const reducer = (state = {}, action) => {
+const reducer = (state = initialState, action) => {
   switch (action.type) {
-  case GOT_USER:
-    return action.user;
-  default:
-    return state;
+    case REGISTER_USER:
+      return {...state, user: action.payload};
+    default:
+      return state;
   }
 };
+
 export default reducer;

@@ -69,3 +69,6 @@ buck-out/
 
 # Local History for Visual Studio Code
 .history/
+
+# Firebase config and API keys
+firebase/*
