@@ -13,18 +13,13 @@ import {
   Toast,
 } from "native-base";
 import theme from "../../native-base-theme/variables/custom";
-import * as ImagePicker from "expo-image-picker";
 import { connect } from "react-redux";
 import EmailInputField from "../components/EmailInputField";
 import PasswordInputField from "../components/PasswordInputField";
 import { AuthContext } from "../navigation/AuthProvider";
+import ProfilePicturePicker from "../components/ProfilePicturePicker";
 
 export class RegistrationPage extends Component {
-  constructor(props) {
-    super(props);
-    this.userProfileImageView = React.createRef();
-  }
-
   state = {
     firstName: "",
     lastName: "",
@@ -34,19 +29,6 @@ export class RegistrationPage extends Component {
   };
 
   static contextType = AuthContext;
-
-  componentDidMount() {
-    (async () => {
-      if (Platform.OS !== "web") {
-        const {
-          status,
-        } = await ImagePicker.requestMediaLibraryPermissionsAsync();
-        if (status !== "granted") {
-          alert("Sorry, we need camera roll permissions to make this work!");
-        }
-      }
-    })();
-  }
 
   setFirstName = (text) => {
     this.setState({ firstName: text });
@@ -61,33 +43,17 @@ export class RegistrationPage extends Component {
     this.setState({ password: text });
   };
 
-  chooseProfileImage = async () => {
-    const options = {
-      mediaTypes: ImagePicker.MediaTypeOptions.Images,
-      allowsEditing: true,
-      aspect: [1, 1],
-      quality: 1,
-    };
+  setProfilePictureUri = (text) => {
+    this.setState({ profilePictureUri: text });
+  };
 
-    let result = await ImagePicker.launchImageLibraryAsync(options);
-
-    if (!result && Platform.OS == "android") {
-      result = await ImagePicker.getPendingResultAsync(options);
-    }
-
-    if (!result.cancelled) {
-      this.setState({ profilePictureUri: result.uri });
-
-      if (Platform.OS == "android") {
-        this.userProfileImageView.current.setNativeProps({
-          src: [{ uri: result.uri }],
-        });
-      } else if (Platform.OS == "ios") {
-        this.userProfileImageView.current.setNativeProps({
-          source: [{ uri: result.uri }],
-        });
-      }
-    }
+  validateRegistration = (firstName, lastName) => {
+    return !(
+      firstName === undefined ||
+      lastName === undefined ||
+      firstName.length == 0 ||
+      lastName.length == 0
+    );
   };
 
   onLogInPress = () => {
@@ -101,13 +67,22 @@ export class RegistrationPage extends Component {
     var lastName = this.state.lastName;
     var profilePictureUri = this.state.profilePictureUri;
 
-    this.context.register(
-      email,
-      password,
-      firstName,
-      lastName,
-      profilePictureUri
-    );
+    if (this.validateRegistration(firstName, lastName)) {
+      this.context.register(
+        email,
+        password,
+        firstName,
+        lastName,
+        profilePictureUri
+      );
+    } else {
+      Toast.show({
+        text: `First name and/or Last name cannot be left blank!`,
+        duration: 3000,
+        type: "danger",
+        position: "bottom",
+      });
+    }
   };
 
   render() {
@@ -120,18 +95,9 @@ export class RegistrationPage extends Component {
         ></Header>
         <Content>
           <Form>
-            <Button
-              active={false}
-              onPress={this.chooseProfileImage}
-              style={styles.userImageButton}
-            >
-              <Image
-                ref={this.userProfileImageView}
-                defaultSource={require("../../assets/add_profile_image.png")}
-                source={require("../../assets/add_profile_image.png")}
-                style={styles.userImage}
-              />
-            </Button>
+            <ProfilePicturePicker
+              onImagePicked={(text) => this.setProfilePictureUri(text)}
+            />
             <Item rounded style={styles.formItem}>
               <Icon
                 name="person"
@@ -203,23 +169,6 @@ const styles = StyleSheet.create({
     backgroundColor: "#00000050",
     borderColor: theme.brandInfo,
     marginVertical: 10,
-  },
-  userImage: {
-    width: 128,
-    height: 128,
-    borderRadius: 128 / 2,
-    overflow: "hidden",
-  },
-  userImageButton: {
-    alignSelf: "center",
-    marginBottom: 10,
-    alignItems: "center",
-    justifyContent: "center",
-    width: 136,
-    height: 136,
-    borderRadius: 136 / 2,
-    borderWidth: 4,
-    borderColor: theme.brandInfo,
   },
   formIconAndText: {
     color: "#FFFFFF90",

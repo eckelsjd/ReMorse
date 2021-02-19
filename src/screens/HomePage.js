@@ -1,71 +1,115 @@
 import React, { Component } from "react";
 import {
   Container,
-  List,
   Header,
   Content,
   Title,
   Button,
   Left,
   Body,
+  Right,
   Icon,
   Fab,
-  Thumbnail,
 } from "native-base";
 import { StyleSheet } from "react-native";
 import { connect } from "react-redux";
 import theme from "../../native-base-theme/variables/custom";
-import { ConversationListItem } from "../components/ConversationListItem";
 import { AuthContext } from "../navigation/AuthProvider";
-import UserAvatar from "react-native-user-avatar";
 import { firebase } from "../firebase/config";
+import ConversationsList from "../components/ConversationsList";
+import EmptyListPlaceholder from "../components/EmptyListPlaceholder";
+import UserThumbnail from "../components/UserThumbnail";
 
-const conversationsRef = firebase.database().ref('conversations/');
-const membersRef = firebase.database().ref('members/');
-const messagesRef = firebase.database().ref('messages/');
-
+const conversationsRef = firebase.database().ref("conversations/");
+const membersRef = firebase.database().ref("members/");
+const messagesRef = firebase.database().ref("messages/");
+const usersRef = firebase.database().ref("users/");
 export class HomePage extends Component {
   static contextType = AuthContext;
+
+  state = {
+    conversations: [],
+    unreadNotifications: null,
+  };
+
   _user = () => {
     return this.context.user;
   };
 
   componentDidMount() {
-    // conversationsRef.
+    usersRef
+      .child(this._user().uid)
+      .child("conversations")
+      .on(
+        "value",
+        function (snapshot) {
+          if (snapshot.exists()) {
+            this.setState({ conversations: snapshot.val() });
+          }
+        },
+        function (errorObject) {
+          console.log("The read failed: " + errorObject.code);
+        }
+      );
   }
 
-  componentWillUnmount() {}
+  componentWillUnmount() {
+    usersRef.child(this._user().uid).child("conversations").off();
+  }
 
+  onAddFriendPress = () => {
+    this.props.navigation.navigate("Contacts");
+  };
   render() {
     return (
       <Container style={styles.container}>
         <Header>
           <Left>
             <Button transparent>
-              {this._user().profilePictureUri ? (
-                <Thumbnail
-                  style={styles.userThumbnail}
-                  source={{ uri: this._user().profilePictureUri }}
-                />
-              ) : (
-                <Thumbnail
-                  style={styles.userThumbnail}
-                  source={require("../../assets/add_profile_image.png")}
-                />
-              )}
+              <UserThumbnail
+                profilePictureUri={this._user().profilePictureUri}
+                firstName={this._user().firstName}
+                lastName={this._user().lastName}
+              />
             </Button>
           </Left>
-          <Body>
+          <Body style={styles.headerBody}>
             <Title>ReMorse</Title>
           </Body>
+          <Right>
+            <Button transparent>
+              <Icon name="search" type="MaterialIcons" />
+            </Button>
+            <Button transparent onPress={this.onAddFriendPress}>
+              <Icon name="person-add" type="MaterialIcons" />
+            </Button>
+            <Button transparent>
+              <Icon name="more-vert" type="MaterialIcons" />
+            </Button>
+          </Right>
         </Header>
-        <Content>
-          <List>
-            {/* <ConversationListItem /> */}
-          </List>
-        </Content>
-        <Fab direction="up" style={styles.fab} position="bottomRight">
+        {console.log(
+          this.state.conversations.length == 0 ? "no convos" : "loading convos"
+        )}
+        {this.state.conversations === undefined ||
+        this.state.conversations.length == 0 ? (
+          <EmptyListPlaceholder
+            iconName="md-sad-outline"
+            iconType="Ionicons"
+            mainText="No Chats...It's a bit lonely."
+            subText="Maybe start a new one using the button below!"
+          />
+        ) : (
+          <ConversationsList
+            conversations={this.state.conversations}
+            unreadNotifications={this.state.unreadNotifications}
+          />
+        )}
+        <Fab active direction="up" style={styles.fab} position="bottomRight">
           <Icon name="message" type="MaterialIcons" />
+          <Button style={styles.logOutButton} onPress={this.context.logout}>
+            <Icon name="logout" type="MaterialIcons" />
+          </Button>
         </Fab>
       </Container>
     );
@@ -79,9 +123,11 @@ const styles = StyleSheet.create({
   fab: {
     backgroundColor: theme.btnPrimaryBg,
   },
-  userThumbnail: {
-    width: 50,
-    height: 50,
+  headerBody: {
+    paddingHorizontal: 30,
+  },
+  logOutButton: {
+    backgroundColor: theme.btnWarningBg,
   },
 });
 
