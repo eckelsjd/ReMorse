@@ -1,29 +1,41 @@
 import React, { Component } from "react";
-import { ListItem, Text, Left, Right, Body, Button, Icon } from "native-base";
-import UserAvatar from "react-native-user-avatar";
+import { ListItem, Text, Body, Button, Icon } from "native-base";
 import UserThumbnail from "./UserThumbnail";
-
+import theme from "../../native-base-theme/variables/custom";
+import { StyleSheet } from "react-native";
 export class FriendListItem extends Component {
+
+
   render() {
     return (
-      <ListItem>
-        <Left>
-          <UserThumbnail
-            profilePictureUri={this.props.profilePictureUri}
-            title={this.props.title}
-          />
-        </Left>
+      <ListItem style={styles.listItem} onPress={this.props.startChat}>
+        <UserThumbnail
+          profilePictureUri={this.props.profilePictureUri}
+          title={this.props.title}
+        />
         <Body>
-          <Text>{this.props.title}</Text>
+          <Text style={styles.listItemText}>{this.props.title}</Text>
         </Body>
-        <Right>
-          <Button rounded>
-            <Icon name="messenger" type="MaterialIcons" />
-          </Button>
-        </Right>
+        <Button rounded style={styles.messageButton} onPress={this.props.startChat}>
+          <Icon name="messenger" type="MaterialIcons" />
+        </Button>
       </ListItem>
     );
   }
 }
 
+const styles = StyleSheet.create({
+  listItem: {
+    marginLeft: 0,
+    paddingLeft: 15,
+    backgroundColor: theme.statusBarColor,
+  },
+  listItemText: {
+    color: theme.inverseTextColor,
+  },
+  messageButton: {
+    alignSelf: "center",
+    backgroundColor: theme.brandInfo,
+  },
+});
 export default FriendListItem;

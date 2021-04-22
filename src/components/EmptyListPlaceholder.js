@@ -17,6 +17,7 @@ export default class EmptyListPlaceholder extends Component {
           <Text style={styles.subText}>{this.props.subText}</Text>
         </View>
       </Container>
+     
     );
   }
 }

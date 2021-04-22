@@ -1,7 +1,6 @@
 import { REGISTER_USER } from "../actionTypes";
 
 const initialState = {
-    user: null,
 };
 
 const reducer = (state = initialState, action) => {

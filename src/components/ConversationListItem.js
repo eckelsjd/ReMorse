@@ -1,6 +1,5 @@
 import React, { Component } from "react";
 import { ListItem, Text, Left, Right, Body, Badge } from "native-base";
-import UserAvatar from "react-native-user-avatar";
 import UserThumbnail from "./UserThumbnail";
 export class ConversationListItem extends Component {
   render() {

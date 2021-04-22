@@ -1,11 +1,16 @@
 import React, { Component } from "react";
-import { List } from "native-base";
+import { List,Container } from "native-base";
 import FriendListItem from "./FriendListItem";
 import EmptyListPlaceholder from "./EmptyListPlaceholder";
-
+import theme from "../../native-base-theme/variables/custom";
+import { StyleSheet } from "react-native";
 export default class FriendsTab extends Component {
+
+  startChat = (index) => {
+    this.props.navigation.navigate("Chat",{friend: this.props.friends[index]});
+  };
+
   render() {
-    {console.log(this.props.friends)}
     return this.props.friends === undefined ||
       this.props.friends.length == 0 ? (
       <EmptyListPlaceholder
@@ -15,14 +20,26 @@ export default class FriendsTab extends Component {
         subText="Try adding a new friend by entering their UID above!"
       />
     ) : (
-      <List>
-        {this.props.friends.map((friend) => {
-          <FriendListItem
-            title={friend.title}
-            profilePictureUri={friend.profilePictureUri}
-          />;
-        })}
-      </List>
+      <Container style={styles.container}>
+        <List
+          dataArray={this.props.friends}
+          keyExtractor={friend => friend.uid}
+          renderRow={(friend,_,index) => (
+            <FriendListItem
+              title={`${friend.firstName} ${friend.lastName}`}
+              profilePictureUri={friend.profilePictureUri}
+              uid={friend.uid}
+              startChat={() => this.startChat(index)}
+            />
+          )}
+        />
+      </Container>
     );
   }
 }
+
+const styles = StyleSheet.create({
+  container: {
+    backgroundColor: theme.brandPrimary,
+  },
+});

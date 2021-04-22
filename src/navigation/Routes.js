@@ -16,22 +16,22 @@ export default class Routes extends Component {
 
   // Handle user state changes
   _onAuthStateChanged = async (user) => {
-    console.log("auth state change: "+user?.uid);
+    console.log("auth state change: " + user?.uid);
     if (user) {
       try {
         const response = await firebase
           .database()
-          .ref('users/' + user.uid)
-          .once('value', (snapshot) => {
-            console.log("snapshot: "+ Object.entries(snapshot.val()));
+          .ref("users/" + user.uid)
+          .once("value", (snapshot) => {
+            console.log("snapshot: " + Object.entries(snapshot.val()));
             if (snapshot.exists()) {
-              console.log("snapshot set user: "+snapshot.val());
+              console.log("snapshot set user: " + snapshot.val());
               this.context.setUser(snapshot.val());
             } else {
               console.log("snapshot user not exist");
               this.context.setUser(null);
             }
-          });       
+          });
       } catch (error) {
         Toast.show({
           text: error.message,

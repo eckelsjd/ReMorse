@@ -11,13 +11,15 @@ import {
   Tabs,
   Tab,
   Toast,
+  Badge,
+  TabHeading,
 } from "native-base";
 import { StyleSheet } from "react-native";
 import { connect } from "react-redux";
 import theme from "../../native-base-theme/variables/custom";
 import { AuthContext } from "../navigation/AuthProvider";
 import { firebase } from "../firebase/config";
-import {getUserFromUid} from "../firebase/util";
+import { getUserFromUid } from "../firebase/util";
 import FriendsTab from "../components/FriendsTab";
 import FriendRequestsTab from "../components/FriendRequestTab";
 
@@ -38,9 +40,8 @@ export class ContactsPage extends Component {
   };
 
   componentDidMount() {
-
-    subscribeToFriendListeners();
-    subscribeToFriendRequestListeners();
+    this.subscribeToFriendListeners();
+    this.subscribeToFriendRequestListeners();
   }
 
   componentWillUnmount() {
@@ -50,37 +51,49 @@ export class ContactsPage extends Component {
     friendRequestsRef.child(this._user().uid).off();
   }
 
-  subscribeToFriendListeners = ()=> {
+  subscribeToFriendListeners = async () => {
     // friend added
     friendsRef.child(this._user().uid).on(
       "child_added",
-      (snapshot) => {
-        console.log(`friend added: ${snapshot.val()}`);
+      async (snapshot) => {
+        console.log(`friend added: ${snapshot.key}`);
+        const friendUid = snapshot.key;
+        const friend = await getUserFromUid(friendUid);
+        this.setState({ friends: [...this.state.friends, friend] });
       },
       (error) => {
         console.log(`${error.code}: ${error.message}`);
       }
     );
-
 
     //friend removed
     friendsRef.child(this._user().uid).on(
       "child_removed",
       (snapshot) => {
-        console.log(`friend removed: ${snapshot.val()}`);
+        console.log(`friend removed: ${snapshot.key}`);
+        const friendUid = snapshot.key;
+        const newFriends = this.state.friends.filter(
+          (friend) => friend.uid !== friendUid
+        );
+        this.setState({ friends: newFriends });
       },
       (error) => {
         console.log(`${error.code}: ${error.message}`);
       }
     );
-  }
+  };
 
-  subscribeToFriendRequestListeners = () => {
-     // friend request added
-     friendRequestsRef.child(this._user().uid).on(
+  subscribeToFriendRequestListeners = async () => {
+    // friend request added
+    friendRequestsRef.child(this._user().uid).on(
       "child_added",
-      (snapshot) => {
-        console.log(`friend request from: ${snapshot.val()}`);
+      async (snapshot) => {
+        const friendUid = snapshot.key;
+        console.log(`friend request from: ${friendUid}`);
+        const friend = await getUserFromUid(friendUid);
+        this.setState({
+          friendRequests: [...this.state.friendRequests, friend],
+        });
       },
       (error) => {
         console.log(`${error.code}: ${error.message}`);
@@ -91,13 +104,18 @@ export class ContactsPage extends Component {
     friendRequestsRef.child(this._user().uid).on(
       "child_removed",
       (snapshot) => {
-        console.log(`friend request dismissed: ${snapshot.val()}`);
+        console.log(`friend request dismissed: ${snapshot.key}`);
+        const friendUid = snapshot.key;
+        const newFriendRequests = this.state.friendRequests.filter(
+          (request) => request.uid !== friendUid
+        );
+        this.setState({ friendRequests: newFriendRequests });
       },
       (error) => {
         console.log(`${error.code}: ${error.message}`);
       }
     );
-  }
+  };
 
   setAddFriendUID = (text) => {
     this.setState({ addingFriendUID: text });
@@ -105,14 +123,18 @@ export class ContactsPage extends Component {
 
   onAddFriendPress = () => {
     const uidToAdd = this.state.addingFriendUID;
-
-    if (uidToAdd === undefined || uidToAdd.length === 0 || uidToAdd === this._user().uid) {
+    if (
+      uidToAdd === undefined ||
+      uidToAdd.length === 0 ||
+      uidToAdd === this._user().uid
+    ) {
       Toast.show({
         text: `Invalid friend UID, could not send friend request`,
         duration: 3000,
         type: "danger",
         position: "bottom",
       });
+
       return;
     }
 
@@ -135,25 +157,24 @@ export class ContactsPage extends Component {
     return filter.length !== 0;
   };
 
-  sendFriendRequest = (uidToAdd) => {
-
-    const friendUser = getUserFromUid(uidToAdd);
-    if(friendUser){
+  sendFriendRequest = async (uidToAdd) => {
+    const friendUser = await getUserFromUid(uidToAdd);
+    if (friendUser) {
       friendRequestsRef
-      .child(friendUser.uid)
-      .set({[this._user().uid]: true}, (error) => {
-        if (!error) {
-          Toast.show({
-            text: `Friend request sent!`,
-            duration: 3000,
-            type: "success",
-            position: "bottom",
-          });
-        } else {
-          console.log(error.message);
-        }
-      });
-    }else{
+        .child(friendUser.uid)
+        .update({ [this._user().uid]: true }, (error) => {
+          if (!error) {
+            Toast.show({
+              text: `Friend request sent!`,
+              duration: 3000,
+              type: "success",
+              position: "bottom",
+            });
+          } else {
+            console.log(error.message);
+          }
+        });
+    } else {
       Toast.show({
         text: `Invalid friend UID, could not send friend request`,
         duration: 3000,
@@ -166,7 +187,7 @@ export class ContactsPage extends Component {
   render() {
     return (
       <Container style={styles.container}>
-        <Header searchBar rounded>
+        <Header searchBar rounded androidStatusBarColor={theme.toolbarDefaultBg} iosBarStyle="light-content" >
           <Item rounded style={styles.formItem}>
             <Icon
               name="search"
@@ -211,12 +232,26 @@ export class ContactsPage extends Component {
         <Tabs initialPage={0}>
           <Tab heading="Friends">
             <FriendsTab
-            friends={this.state.friends}
+              friends={this.state.friends}
+              navigation={this.props.navigation}
             />
           </Tab>
-          <Tab heading="Requests">
+          <Tab
+            heading={
+              this.state.friendRequests.length !== 0 ? (
+                <TabHeading>
+                  <Text>Requests</Text>
+                  <Badge>
+                    <Text>{this.state.friendRequests.length}</Text>
+                  </Badge>
+                </TabHeading>
+              ) : (
+                "Requests"
+              )
+            }
+          >
             <FriendRequestsTab
-            friendRequests={this.state.friendRequests}
+              friendRequests={this.state.friendRequests}
             />
           </Tab>
         </Tabs>

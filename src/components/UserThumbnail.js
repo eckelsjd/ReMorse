@@ -1,23 +1,38 @@
 import React, { Component } from "react";
-import { StyleSheet } from "react-native";
 import { Thumbnail } from "native-base";
-import { UserAvatar } from "react-native-user-avatar";
-export default class FriendsTab extends Component {
+import UserAvatar  from "react-native-user-avatar";
+export default class UserThumbnail extends Component {
+
+  state = {
+    imageError: false,
+  };
+
+  onImageError = () => {
+    this.setState({ imageError: true });
+  };
+
+  getSize = ()=>{
+    if (this.props.thumbnailSize) {
+        return this.props.thumbnailSize;
+    }else{
+        return 50;
+    }
+  }
+
   render() {
-    return this.props.profilePictureUri ? (
+    return (this.props.profilePictureUri && !this.state.imageError) ? (
       <Thumbnail
-        style={styles.userThumbnail}
+        style={{width: this.getSize(), height: this.getSize()}}
         source={{ uri: this.props.profilePictureUri }}
+        onError={this.onImageError}
+        onLoad={() => {
+          if (this.state.imageError) {
+            this.setState({ imageError: false });
+          }
+        }}
       />
     ) : (
-      <UserAvatar style={styles.userThumbnail} name={this.props.title} />
+      <UserAvatar size={this.getSize()} name={this.props.title} />
     );
   }
 }
-
-const styles = StyleSheet.create({
-  userThumbnail: {
-    width: 50,
-    height: 50,
-  },
-});

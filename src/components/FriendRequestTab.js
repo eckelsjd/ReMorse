@@ -1,7 +1,9 @@
 import React, { Component } from "react";
-import { List } from "native-base";
+import { List, Container } from "native-base";
 import FriendRequestListItem from "./FriendRequestListItem";
 import EmptyListPlaceholder from "./EmptyListPlaceholder";
+import theme from "../../native-base-theme/variables/custom";
+import { StyleSheet } from "react-native";
 
 export default class FriendRequestTab extends Component {
   render() {
@@ -14,14 +16,25 @@ export default class FriendRequestTab extends Component {
         subText="Why not speak to your existing ones?"
       />
     ) : (
-      <List>
-        {this.props.friendRequests.map((friendRequest) => {
-          <FriendRequestListItem
-            title={friendRequest.title}
-            profilePictureUri={friendRequest.profilePictureUri}
-          />;
-        })}
-      </List>
+      <Container style={styles.container}>
+        <List
+          dataArray={this.props.friendRequests}
+          keyExtractor={friendRequest => friendRequest.uid}
+          renderRow={(friendRequest) => (
+            <FriendRequestListItem
+              title={`${friendRequest.firstName} ${friendRequest.lastName}`}
+              profilePictureUri={friendRequest.profilePictureUri}
+              uid={friendRequest.uid}
+            />
+          )}
+        />
+      </Container>
     );
   }
 }
+
+const styles = StyleSheet.create({
+  container: {
+    backgroundColor: theme.brandPrimary,
+  },
+});
