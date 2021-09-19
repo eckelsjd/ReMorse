@@ -1,5 +1,5 @@
 import React, { Component } from "react";
-import { Image, StyleSheet, Platform } from "react-native";
+import { Image, StyleSheet, Platform, Alert } from "react-native";
 import { Button } from "native-base";
 import theme from "../../native-base-theme/variables/custom";
 import * as ImagePicker from "expo-image-picker";
@@ -9,25 +9,30 @@ export default class ProfilePicturePicker extends Component {
     super(props);
     this.userProfileImageView = React.createRef();
   }
-  componentDidMount() {
-    this.requestMediaLibraryPermissionsAsync();
-  }
 
-  requestMediaLibraryPermissionsAsync = async () => {
+
+requestMediaLibraryPermissionsAsync = async () => {
     if (Platform.OS !== "web") {
       const {
         status,
       } = await ImagePicker.requestMediaLibraryPermissionsAsync();
       if (status !== "granted") {
-        alert(
-          "Sorry, we need media/camera roll permissions to make this work!"
+        Alert.alert(
+          'Permission Required',
+          'We cannot pick a profile image without media permissions. Enable the camera/media permissions from your app settings', 
+          [
+            {text: 'OK'},
+          ],
+          {cancelable: false},
         );
-        this.requestMediaLibraryPermissionsAsync();
       }
     }
   };
 
   chooseProfileImage = async () => {
+
+    this.requestMediaLibraryPermissionsAsync();
+
     const options = {
       mediaTypes: ImagePicker.MediaTypeOptions.Images,
       allowsEditing: true,

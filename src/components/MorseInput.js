@@ -1,6 +1,15 @@
 import React, { Component } from "react";
-import { StyleSheet } from "react-native";
-import { Container, Button, Grid, Row, Text, Icon } from "native-base";
+import { StyleSheet, Dimensions } from "react-native";
+import {
+  Container,
+  Button,
+  Grid,
+  Row,
+  Text,
+  Icon,
+  Body,
+  Col,
+} from "native-base";
 import theme from "../../native-base-theme/variables/custom";
 
 export default class MorseInput extends Component {
@@ -10,47 +19,59 @@ export default class MorseInput extends Component {
   render() {
     return (
       <Container style={styles.container}>
-        <Grid>
-          <Row style={styles.morseButtonRow}>
-            <Button style={styles.morseButton}>
-              <Text style={styles.morseButtonText}>-</Text>
-            </Button>
-            <Button style={styles.morseButton}>
-              <Text style={styles.morseButtonText}>.</Text>
-            </Button>
-          </Row>
-          <Row style={styles.actionButtonRow}>
-            <Button
-              icon
-              rounded
-              style={styles.actionButton}
-              onPress={() =>
-                this.setState({ shiftEnabled: !this.state.shiftEnabled })
-              }
-            >
-              {this.state.shiftEnabled ? (
-                <Icon name="arrow-up-bold" type="MaterialCommunityIcons" />
-              ) : (
-                <Icon
-                  name="arrow-up-bold-outline"
-                  type="MaterialCommunityIcons"
-                />
-              )}
-            </Button>
-            <Button icon rounded style={styles.actionButton}>
-              <Icon name="help" type="MaterialIcons" />
-            </Button>
-            <Button icon rounded style={styles.spaceBarButton}>
-              <Icon name="space-bar" type="MaterialIcons" />
-            </Button>
-            <Button icon rounded style={styles.actionButton}>
-              <Icon name="backspace" type="MaterialIcons" />
-            </Button>
-            <Button icon rounded style={styles.actionButton}>
-              <Icon name="keyboard-return" type="MaterialIcons" />
-            </Button>
-          </Row>
-        </Grid>
+        <Body>
+          <Grid>
+            <Row style={styles.livePreviewRow}>
+              <Col>
+                <Button>
+                  <Text>BUTTON</Text>
+                </Button>
+              </Col>
+            </Row>
+            <Row style={styles.morseButtonRow}>
+              <Col>
+                <Button full style={styles.morseButton}>
+                  <Text style={styles.morseButtonText}>-</Text>
+                </Button>
+              </Col>
+              <Col>
+                <Button full style={styles.morseButton}>
+                  <Text style={styles.morseButtonText}>.</Text>
+                </Button>
+              </Col>
+            </Row>
+            <Row style={styles.actionButtonRow}>
+              <Button
+                icon
+                style={styles.actionButton}
+                onPress={() =>
+                  this.setState({ shiftEnabled: !this.state.shiftEnabled })
+                }
+              >
+                {this.state.shiftEnabled ? (
+                  <Icon name="arrow-up-bold" type="MaterialCommunityIcons" />
+                ) : (
+                  <Icon
+                    name="arrow-up-bold-outline"
+                    type="MaterialCommunityIcons"
+                  />
+                )}
+              </Button>
+              <Button icon style={styles.actionButton}>
+                <Icon name="help" type="MaterialIcons" />
+              </Button>
+              <Button icon style={styles.spaceBarButton}>
+                <Icon name="space-bar" type="MaterialIcons" />
+              </Button>
+              <Button icon style={styles.actionButton}>
+                <Icon name="backspace" type="MaterialIcons" />
+              </Button>
+              <Button icon style={styles.actionButton}>
+                <Icon name="keyboard-return" type="MaterialIcons" />
+              </Button>
+            </Row>
+          </Grid>
+        </Body>
       </Container>
     );
   }
@@ -65,34 +86,43 @@ const styles = StyleSheet.create({
     borderLeftWidth: 4,
     borderRightWidth: 4,
   },
+  livePreviewRow: {
+    height: "20%",
+  },
   morseButtonRow: {
-    height: 110,
+    height: "55%",
+    justifyContent: "center",
+    alignItems: "center",
   },
   actionButtonRow: {
-    height: 60,
-
+    height: "20%",
+    justifyContent: "center",
+    alignItems: "center",
   },
   morseButton: {
     backgroundColor: theme.btnPrimaryBg,
     justifyContent: "center",
     alignItems: "center",
-    width: 100,
-    height: 100,
-    borderRadius: 100 / 2,
-    marginHorizontal: 20,
+    // width: "32%",
+    // height: "80%",
+    // borderRadius:
+    //   Math.round(
+    //     Dimensions.get("window").width + Dimensions.get("window").height
+    //   ) / 2,
+    // marginHorizontal: 20,
   },
   morseButtonText: {
-    alignSelf: "center",
-    fontSize: 50,
+    // alignSelf: "center",
+    // fontSize: 50,
   },
   actionButton: {
-    backgroundColor: theme.btnPrimaryBg,
+    backgroundColor: theme.brandPrimary,
     justifyContent: "center",
     alignItems: "center",
     marginHorizontal: 5,
   },
   spaceBarButton: {
-    backgroundColor: theme.btnPrimaryBg,
+    backgroundColor: theme.brandPrimary,
     justifyContent: "center",
     alignItems: "center",
     width: 100,

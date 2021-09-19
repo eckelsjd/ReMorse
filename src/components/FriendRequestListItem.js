@@ -17,32 +17,34 @@ export class FriendRequestListItem extends Component {
     return this.context.user;
   };
 
-  acceptRequest = async () => {
-    this.addFriend();
-    this.createRoom();
-    this.removeRequest();
-  };
+  // TODO: extract into Model. Separate Domain details from View
+  
+  // acceptRequest = async () => {
+  //   this.addFriend();
+  //   this.createRoom();
+  //   this.removeRequest();
+  // };
 
-  removeRequest = async () => {
-    friendRequestsRef.child(this._user().uid).child(this.props.uid).remove();
-  };
+  // removeRequest = async () => {
+  //   friendRequestsRef.child(this._user().uid).child(this.props.uid).remove();
+  // };
 
-  addFriend = async () => {
-    friendsRef.child(this._user().uid).update({ [this.props.uid]: true });
+  // addFriend = async () => {
+  //   friendsRef.child(this._user().uid).update({ [this.props.uid]: true });
 
-    friendsRef.child(this.props.uid).update({ [this._user().uid]: true });
-  };
+  //   friendsRef.child(this.props.uid).update({ [this._user().uid]: true });
+  // };
 
-  createRoom = async () => {
-    roomMemberKey = (await roomMembersRef.push()).key;
-    roomMembersRef
-      .child(roomMemberKey)
-      .update({ [this._user().uid]: true, [this.props.uid]: true }, (error) => {
-        if (error) {
-          console.log(error.message);
-        }
-      });
-  };
+  // createRoom = async () => {
+  //   roomMemberKey = (await roomMembersRef.push()).key;
+  //   roomMembersRef
+  //     .child(roomMemberKey)
+  //     .update({ [this._user().uid]: true, [this.props.uid]: true }, (error) => {
+  //       if (error) {
+  //         console.log(error.message);
+  //       }
+  //     });
+  // };
 
   render() {
     return (

@@ -11,20 +11,14 @@ import {
   Fab,
   View,
 } from "native-base";
-import { StyleSheet, Platform } from "react-native";
-import { connect } from "react-redux";
-import theme from "../../native-base-theme/variables/custom";
-import { AuthContext } from "../navigation/AuthProvider";
-import { firebase } from "../firebase/config";
-import ConversationsList from "../components/ConversationsList";
-import EmptyListPlaceholder from "../components/EmptyListPlaceholder";
-import UserThumbnail from "../components/UserThumbnail";
-import * as ImagePicker from "expo-image-picker";
+import { StyleSheet } from "react-native";
+import theme from "../../../native-base-theme/variables/custom";
+import { AuthContext } from "../../navigation/AuthProvider";
+import ConversationsList from "../../components/ConversationsList";
+import EmptyListPlaceholder from "../../components/EmptyListPlaceholder";
+import UserThumbnail from "../../components/UserThumbnail";
 
-const conversationsRef = firebase.database().ref("conversations/");
-const membersRef = firebase.database().ref("members/");
-const messagesRef = firebase.database().ref("messages/");
-const usersRef = firebase.database().ref("users/");
+
 export class HomePage extends Component {
   static contextType = AuthContext;
 
@@ -39,24 +33,10 @@ export class HomePage extends Component {
   };
 
   componentDidMount() {
-    this.requestMediaLibraryPermissionsAsync();
   }
 
   componentWillUnmount() {}
 
-  requestMediaLibraryPermissionsAsync = async () => {
-    if (Platform.OS !== "web") {
-      const {
-        status,
-      } = await ImagePicker.requestMediaLibraryPermissionsAsync();
-      if (status !== "granted") {
-        alert(
-          "Sorry, we need media/camera roll permissions to make this work!"
-        );
-        this.requestMediaLibraryPermissionsAsync();
-      }
-    }
-  };
 
   openContacts = () => {
     this.props.navigation.navigate("Contacts");
@@ -155,8 +135,5 @@ const styles = StyleSheet.create({
   },
 });
 
-function mapStateToProps(state) {
-  return state;
-}
 
-export default connect(mapStateToProps)(HomePage);
+export default HomePage;

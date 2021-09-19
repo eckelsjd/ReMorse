@@ -1,6 +1,5 @@
 import React, { Component } from "react";
 import { registerRootComponent } from "expo";
-import { connect } from "react-redux";
 import AllAppProviders from "./navigation";
 
 class RemorseApp extends Component {
@@ -9,9 +8,5 @@ class RemorseApp extends Component {
   }
 }
 
-function mapStateToProps(state) {
-  return state;
-}
-
 registerRootComponent(RemorseApp);
-export default connect(mapStateToProps)(RemorseApp);
+export default RemorseApp;

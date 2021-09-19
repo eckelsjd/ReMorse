@@ -10,13 +10,12 @@ import {
   Right,
   Icon,
 } from "native-base";
-import { StyleSheet, Platform, KeyboardAvoidingView } from "react-native";
-import { connect } from "react-redux";
-import theme from "../../native-base-theme/variables/custom";
-import { AuthContext } from "../navigation/AuthProvider";
-import { firebase } from "../firebase/config";
-import EmptyListPlaceholder from "../components/EmptyListPlaceholder";
-import UserThumbnail from "../components/UserThumbnail";
+import { StyleSheet } from "react-native";
+import theme from "../../../native-base-theme/variables/custom";
+import { AuthContext } from "../../navigation/AuthProvider";
+import { firebase } from "../../firebase/config";
+import EmptyListPlaceholder from "../../components/EmptyListPlaceholder";
+import UserThumbnail from "../../components/UserThumbnail";
 import { GiftedChat } from "react-native-gifted-chat";
 import {
   renderBubble,
@@ -27,8 +26,8 @@ import {
   getGiftedChatMessage,
   getGiftedChatUser,
   renderActions,
-} from "../components/ChatComponents";
-import MorseInput from "../components/MorseInput";
+} from "../../components/ChatComponents";
+import MorseInput from "../../components/MorseInput";
 
 const messagesRef = firebase.database().ref("/messages");
 const membersRef = firebase.database().ref("/members");
@@ -61,7 +60,6 @@ export class ChatPage extends Component {
   componentWillUnmount() {
     //unsubscribe from listeners
   }
-
 
   subscribeToMessagesListener = async () => {
     // message added
@@ -162,28 +160,27 @@ export class ChatPage extends Component {
         ) : (
           <></>
         )}
-        <Container>
-          <GiftedChat
-            minInputToolbarHeight={80}
-            placeholder="Say something..."
-            messages={this.state.messages}
-            user={getGiftedChatUser(this._user())}
-            renderBubble={renderBubble}
-            renderLoading={renderLoading}
-            renderSend={renderSend}
-            renderInputToolbar={renderInputToolbar}
-            scrollToBottomComponent={scrollToBottomComponent}
-            onSend={(messages) => {
-              this.sendMessage(messages);
-            }}
-            // renderActions={renderActions}
-            // addAction={this.addAction}
-            showUserAvatar
-            scrollToBottom
-          />
+        <GiftedChat
+          minInputToolbarHeight={80}
+          placeholder="Say something..."
+          messages={this.state.messages}
+          user={getGiftedChatUser(this._user())}
+          renderBubble={renderBubble}
+          renderLoading={renderLoading}
+          renderSend={renderSend}
+          renderInputToolbar={renderInputToolbar}
+          scrollToBottomComponent={scrollToBottomComponent}
+          onSend={(messages) => {
+            this.sendMessage(messages);
+          }}
+          // renderActions={renderActions}
+          // addAction={this.addAction}
+          showUserAvatar
+          scrollToBottom
+          disableComposer
+        />
 
-          {/* <MorseInput /> */}
-        </Container>
+        <MorseInput />
       </Container>
     );
   }
@@ -198,8 +195,4 @@ const styles = StyleSheet.create({
   },
 });
 
-function mapStateToProps(state) {
-  return state;
-}
-
-export default connect(mapStateToProps)(ChatPage);
+export default ChatPage;

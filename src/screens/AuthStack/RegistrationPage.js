@@ -12,12 +12,12 @@ import {
   Button,
   Toast,
 } from "native-base";
-import theme from "../../native-base-theme/variables/custom";
+import theme from "../../../native-base-theme/variables/custom";
 import { connect } from "react-redux";
-import EmailInputField from "../components/EmailInputField";
-import PasswordInputField from "../components/PasswordInputField";
-import { AuthContext } from "../navigation/AuthProvider";
-import ProfilePicturePicker from "../components/ProfilePicturePicker";
+import EmailInputField from "../../components/EmailInputField";
+import PasswordInputField from "../../components/PasswordInputField";
+import { AuthContext } from "../../navigation/AuthProvider";
+import ProfilePicturePicker from "../../components/ProfilePicturePicker";
 
 export class RegistrationPage extends Component {
   state = {
@@ -184,8 +184,4 @@ const styles = StyleSheet.create({
   },
 });
 
-function mapStateToProps(state) {
-  return state;
-}
-
-export default connect(mapStateToProps)(RegistrationPage);
+export default RegistrationPage;

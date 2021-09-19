@@ -1,8 +1,8 @@
 import React from "react";
 import { createStackNavigator } from "@react-navigation/stack";
-import { HomePage } from "../screens/HomePage";
-import { ContactsPage } from "../screens/ContactsPage";
-import { ChatPage } from "../screens/ChatPage";
+import { HomePage } from "../screens/HomeStack/HomePage";
+import { ContactsPage } from "../screens/HomeStack/ContactsPage";
+import { ChatPage } from "../screens/HomeStack/ChatPage";
 
 const Stack = createStackNavigator();
 

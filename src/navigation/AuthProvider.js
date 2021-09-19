@@ -1,6 +1,6 @@
-import React, { createContext, useState, Component } from "react";
 import { Toast } from "native-base";
-import { firebase } from "../firebase/config";
+import React, { Component, createContext } from "react";
+import { login, logout, register } from "../model/Users";
 
 _firebaseError = (error) => {
   console.log(error);
@@ -31,11 +31,8 @@ export class AuthProvider extends Component {
             this.setState({ user: user });
           },
           login: async (email, password) => {
-            try {
-              const response = await firebase
-                .auth()
-                .signInWithEmailAndPassword(email, password);
-            } catch (error) {
+            const error = await login(email, password);
+            if (error) {
               _firebaseError(error);
             }
           },
@@ -46,32 +43,20 @@ export class AuthProvider extends Component {
             lastName,
             profilePictureUri = null
           ) => {
-            try {
-              const response = await firebase
-                .auth()
-                .createUserWithEmailAndPassword(email, password);
-              const uid = response.user.uid;
-              const userData = {
-                uid: uid,
-                email: email,
-                firstName: firstName,
-                lastName: lastName,
-                profilePictureUri: profilePictureUri,
-              };
-              
-              const promise = await firebase
-                .database()
-                .ref("users/" + uid)
-                .set(userData);
-
-            } catch (error) {
+            const error = await register(
+              email,
+              password,
+              firstName,
+              lastName,
+              profilePictureUri
+            );
+            if (error) {
               _firebaseError(error);
             }
           },
           logout: async () => {
-            try {
-              await firebase.auth().signOut();
-            } catch (error) {
+            const error = await logout();
+            if (error) {
               _firebaseError(error);
             }
           },

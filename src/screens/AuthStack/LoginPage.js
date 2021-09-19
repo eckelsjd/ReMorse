@@ -10,11 +10,10 @@ import {
   Form,
   Item,
 } from "native-base";
-import theme from "../../native-base-theme/variables/custom";
-import { connect } from "react-redux";
-import EmailInputField from "../components/EmailInputField";
-import PasswordInputField from "../components/PasswordInputField";
-import { AuthContext } from "../navigation/AuthProvider";
+import theme from "../../../native-base-theme/variables/custom";
+import EmailInputField from "../../components/EmailInputField";
+import PasswordInputField from "../../components/PasswordInputField";
+import { AuthContext } from "../../navigation/AuthProvider";
 
 export class LoginPage extends Component {
   state = {
@@ -53,7 +52,7 @@ export class LoginPage extends Component {
           <Form>
             <Image
               style={styles.logo}
-              source={require("../../assets/icon.png")}
+              source={require("../../../assets/icon.png")}
             />
 
             <EmailInputField
@@ -147,8 +146,4 @@ const styles = StyleSheet.create({
   },
 });
 
-function mapStateToProps(state) {
-  return state;
-}
-
-export default connect(mapStateToProps)(LoginPage);
+export default LoginPage;
